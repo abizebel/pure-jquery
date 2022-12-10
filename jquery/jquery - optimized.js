@@ -56,6 +56,7 @@
                 return obj.length - 1 in obj
             }
         }
+        return false
     }
 
     //Static Method Extends
@@ -120,7 +121,7 @@
 
                 if (ret && isArrayLike(ret)) {
                     //hijack push form array
-                    [].push.apply(elements, args)
+                    [].push.apply(elements, ret)
                 } else if (ret) {
                     elements.push(ret)
                 }
@@ -189,6 +190,9 @@
         }),
         parent: makeTraverser(function() {
             return this.parentNode
+        }),
+        children: makeTraverser(function() {
+            return this.children
         })
     })
 })()

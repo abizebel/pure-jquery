@@ -56,6 +56,7 @@
                 return obj.length - 1 in obj
             }
         }
+        return false
     }
 
     //Static Method Extends
