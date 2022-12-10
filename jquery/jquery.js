@@ -19,13 +19,12 @@
         }
 
         var elements = [];
-
         if (typeof selector === 'string') {
             var elements = document.querySelectorAll(selector);
 
         } else {
             //assume array
-            elements = selector
+            elements = [selector]
         }
 
 
@@ -120,7 +119,6 @@
     }
 
     var rnothtmlwhite = (/[^\x20\t\r\n\f]+/g);
-    var cssExpand = ["Top", "Right", "Bottom", "Left"];
 
     // Strip and collapse whitespace according to HTML spec
     // https://infra.spec.whatwg.org/#strip-and-collapse-ascii-whitespace
@@ -128,28 +126,6 @@
         var tokens = value.match(rnothtmlwhite) || [];
         return tokens.join(" ");
     }
-
-
-    var genFx = function(type, includeWidth) {
-        var which,
-            i = 0,
-            attrs = { height: type };
-
-        // If we include width, step value is 1 to do all cssExpand values,
-        // otherwise step value is 2 to skip over Left and Right
-        includeWidth = includeWidth ? 1 : 0;
-        for (; i < 4; i += 2 - includeWidth) {
-            which = cssExpand[i];
-            attrs["margin" + which] = attrs["padding" + which] = type;
-        }
-
-        if (includeWidth) {
-            attrs.opacity = attrs.width = type;
-        }
-
-        return attrs;
-    }
-
 
 
     var getClass = function(elem) {
@@ -202,7 +178,7 @@
         find: function(selector) {
             var elements = [];
 
-            return $.each(this, function(i, el) {
+            $.each(this, function(i, el) {
                 var els = el.querySelectorAll(selector);
                 //hijack push form array
                 [].push.apply(elements, els)
@@ -309,13 +285,6 @@
 
             return false;
         },
-        first: function() {
-            return this.eq(0);
-        },
-        slideToggle: genFx("toggle"),
-
-
-
 
 
     })
