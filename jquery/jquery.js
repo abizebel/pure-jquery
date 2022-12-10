@@ -110,6 +110,8 @@
         return txt;
     }
 
+
+
     $.extend($.prototype, {
         html: function(newHtml) {
             if (arguments.length) {
@@ -180,6 +182,15 @@
 
             return $(elements)
 
+        },
+        parent: function() {
+            var elements = [];
+
+            $.each(this, function(i, el) {
+                elements.push(el.parentNode)
+            })
+
+            return $(elements)
         }
     })
 })()
