@@ -6,7 +6,23 @@
         //get elements using selector
         //go thorough each element and copy to "this"
         //set a property length
-        var elements = document.querySelectorAll(selector);
+
+        //call new $(selector) automatically
+        if (!(this instanceof $)) {
+            return new $(selector)
+        }
+
+        var elements = [];
+
+        if (typeof selector === 'string') {
+            var elements = document.querySelectorAll(selector);
+
+        } else {
+            //assume array
+            elements = selector
+        }
+
+
 
         for (var i = 0; i < elements.length; i++) {
             this[i] = elements[i]
@@ -78,6 +94,22 @@
         },
     })
 
+
+    var getText = function(el) {
+        var txt = "";
+
+        $.each(el.childNodes, function(i, childNode) {
+            if (childNode.nodeType === Node.TEXT_NODE) {
+                txt = txt + childNode.nodeValue
+            } else if (childNode.nodeType === Node.ELEMENT_NODE) {
+                txt = txt + getText(childNode)
+
+            }
+        })
+
+        return txt;
+    }
+
     $.extend($.prototype, {
         html: function(newHtml) {
             if (arguments.length) {
@@ -89,5 +121,65 @@
                 return this[0].innerHTML;
             }
         },
+        text: function(newText) {
+            if (arguments.length) {
+                this.html("")
+                return $.each(this, function(i, el) {
+                    var text = document.createTextNode(newText);
+                    el.appendChild(text)
+                })
+            } else {
+                return this[0] && getText(this[0])
+            }
+        },
+        find: function(selector) {
+            var elements = [];
+
+            $.each(this, function(i, el) {
+                var els = el.querySelectorAll(selector);
+                //hijack push form array
+                [].push.apply(elements, els)
+            })
+
+            return $(elements)
+        },
+        next: function() {
+            var elements = [];
+
+            $.each(this, function(i, el) {
+                var current = el.nextSibling;
+
+                while (current && current.nodeType !== 1) {
+                    current = current.nextSibling;
+                }
+
+
+                if (current) {
+                    elements.push(current)
+                }
+            })
+
+            return $(elements)
+
+        },
+        prev: function() {
+            var elements = [];
+
+            $.each(this, function(i, el) {
+                var current = el.previousSibling;
+
+                while (current && current.nodeType !== 1) {
+                    current = current.previousSibling;
+                }
+
+
+                if (current) {
+                    elements.push(current)
+                }
+            })
+
+            return $(elements)
+
+        }
     })
 })()
