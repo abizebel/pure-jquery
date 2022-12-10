@@ -111,7 +111,26 @@
         return txt;
     }
 
+    var makeTraverser = function(cb) {
+        return function() {
+            var elements = [];
+            args = arguments;
 
+            $.each(this, function(i, el) {
+                var ret = cb.apply(el, args);
+
+                if (ret && isArrayLike(ret)) {
+                    //hijack push form array
+                    [].push.apply(elements, ret)
+                } else if (ret) {
+                    elements.push(ret)
+                }
+
+            })
+
+            return $(elements)
+        }
+    }
 
     $.extend($.prototype, {
         html: function(newHtml) {
@@ -146,52 +165,70 @@
 
             return $(elements)
         },
-        next: function() {
-            var elements = [];
+        next: makeTraverser(function() {
+            var current = this.nextSibling;
 
-            $.each(this, function(i, el) {
-                var current = el.nextSibling;
+            while (current && current.nodeType !== 1) {
+                current = current.nextSibling;
+            }
 
-                while (current && current.nodeType !== 1) {
-                    current = current.nextSibling;
-                }
+            if (current) {
+                return current
+            }
+        }),
 
+        prev: makeTraverser(function() {
+            var current = this.previousSibling;
 
-                if (current) {
-                    elements.push(current)
-                }
-            })
+            while (current && current.nodeType !== 1) {
+                current = current.previousSibling;
+            }
 
-            return $(elements)
-
+            if (current) {
+                return current
+            }
+        }),
+        parent: makeTraverser(function() {
+            return this.parentNode
+        }),
+        children: makeTraverser(function() {
+            return this.children
+        }),
+        attr: function(attrName, value) {
+            if (arguments.length > 1) {
+                return $.each(this, function(i, el) {
+                    el.setAttribute(attrName, value)
+                })
+            } else {
+                return this[0] && this[0].getAttribute(attrName)
+            }
         },
-        prev: function() {
-            var elements = [];
-
-            $.each(this, function(i, el) {
-                var current = el.previousSibling;
-
-                while (current && current.nodeType !== 1) {
-                    current = current.previousSibling;
-                }
-
-
-                if (current) {
-                    elements.push(current)
-                }
-            })
-
-            return $(elements)
-
+        css: function(cssPropName, value) {
+            if (arguments.length > 1) {
+                return $.each(this, function(i, el) {
+                    el.style[cssPropName] = value;
+                })
+            } else {
+                return this[0] && document.defaultView.getComputedStyle(this[0]).getPropertyValue(cssPropName)
+            }
         },
-        parent: function() {
-            var elements = [];
-
-            $.each(this, function(i, el) {
-                elements.push(el.parentNode)
+        show: function() {
+            this.css('display', 'block')
+            return this
+        },
+        hide: function() {
+            this.css('display', 'none')
+            return this
+        },
+        bind: function(eventName, handler) {
+            return $.each(this, function(i, el) {
+                el.addEventListener(eventName, handler, false)
             })
-
-            return $(elements)
+        },
+        unbind: function(eventName, handler) {
+            return $.each(this, function(i, el) {
+                el.removeEventListener(eventName, handler, false)
+            })
         }
     })
 })()
