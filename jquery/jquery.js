@@ -93,6 +93,8 @@
         isArray: function(value) {
             return Object.prototype.toString.call(value) === "[object Array]"
         },
+
+
     })
 
 
@@ -109,6 +111,21 @@
         })
 
         return txt;
+    }
+
+    var rnothtmlwhite = (/[^\x20\t\r\n\f]+/g);
+
+    // Strip and collapse whitespace according to HTML spec
+    // https://infra.spec.whatwg.org/#strip-and-collapse-ascii-whitespace
+    var stripAndCollapse = function(value) {
+        var tokens = value.match(rnothtmlwhite) || [];
+        return tokens.join(" ");
+    }
+
+
+
+    var getClass = function(elem) {
+        return elem.getAttribute && elem.getAttribute("class") || "";
     }
 
     var makeTraverser = function(cb) {
@@ -229,6 +246,45 @@
             return $.each(this, function(i, el) {
                 el.removeEventListener(eventName, handler, false)
             })
+        },
+        toggleClass: function(className) {
+            return $.each(this, function(i, el) {
+                el.classList.toggle(className);
+            })
+        },
+        addClass: function(className) {
+            return $.each(this, function(i, el) {
+                if (!!!this.classList.contains(className)) {
+                    el.className += " " + className;
+                }
+            })
+
+        },
+        removeClass: function(className) {
+            return $.each(this, function(i, el) {
+                if (!!this.classList.contains(className)) {
+                    var reg = new RegExp('(\\s|^)' + className + '(\\s|$)');
+                    this.className = el.className.replace(reg, ' ');
+                }
+            })
+        },
+        hasClass: function(selector) {
+            var className, elem,
+                i = 0;
+
+            className = " " + selector + " ";
+            while ((elem = this[i++])) {
+                if (elem.nodeType === 1 &&
+                    (" " + stripAndCollapse(getClass(elem)) + " ").indexOf(className) > -1) {
+                    return true;
+                }
+            }
+
+            return false;
         }
+
+
+
+
     })
 })()
