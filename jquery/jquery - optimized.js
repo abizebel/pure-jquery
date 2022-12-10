@@ -115,10 +115,10 @@
             var elements = [];
             args = arguments;
 
-            $.each(el.childNodes, function(i, el) {
+            $.each(this, function(i, el) {
                 var ret = cb.apply(el, args);
 
-                if (isArrayLike(ret)) {
+                if (ret && isArrayLike(ret)) {
                     //hijack push form array
                     [].push.apply(elements, args)
                 } else if (ret) {
@@ -164,43 +164,31 @@
 
             return $(elements)
         },
-        next: function() {
-            var elements = [];
+        next: makeTraverser(function() {
+            var current = this.nextSibling;
 
-            $.each(this, function(i, el) {
-                var current = el.nextSibling;
+            while (current && current.nodeType !== 1) {
+                current = current.nextSibling;
+            }
 
-                while (current && current.nodeType !== 1) {
-                    current = current.nextSibling;
-                }
+            if (current) {
+                return current
+            }
+        }),
 
+        prev: makeTraverser(function() {
+            var current = this.previousSibling;
 
-                if (current) {
-                    elements.push(current)
-                }
-            })
+            while (current && current.nodeType !== 1) {
+                current = current.previousSibling;
+            }
 
-            return $(elements)
-
-        },
-        prev: function() {
-            var elements = [];
-
-            $.each(this, function(i, el) {
-                var current = el.previousSibling;
-
-                while (current && current.nodeType !== 1) {
-                    current = current.previousSibling;
-                }
-
-
-                if (current) {
-                    elements.push(current)
-                }
-            })
-
-            return $(elements)
-
-        }
+            if (current) {
+                return current
+            }
+        }),
+        parent: makeTraverser(function() {
+            return this.parentNode
+        })
     })
 })()
